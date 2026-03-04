@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Institucional</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            padding-top: 40px;
+        }
+
+        .chat-container {
+            width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #1f3c88;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            padding: 15px;
+            height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 70%;
+        }
+
+        .user {
+            background: #d1e7ff;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background: #e2e2e2;
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            gap: 5px;
+            border-top: 1px solid #ddd;
+        }
+
+        input {
+            flex: 1;
+            padding: 8px;
+        }
+
+        button {
+            background: #1f3c88;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .user-info {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        Chatbot CIIP
+    </div>
+
+    <div class="user-info">
+        <input type="text" id="name" placeholder="Nombre">
+        <input type="text" id="company" placeholder="Empresa">
+    </div>
+
+    <div class="chat-messages" id="chat"></div>
+
+    <div class="chat-input">
+        <input type="text" id="message" placeholder="Escribe tu mensaje...">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+
+    const name = document.getElementById("name").value;
+    const company = document.getElementById("company").value;
+    const messageInput = document.getElementById("message");
+    const message = messageInput.value;
+
+    if (!name || !company || !message) {
+        alert("Completa todos los campos.");
+        return;
+    }
+
+    const chat = document.getElementById("chat");
+
+    // Mostrar mensaje usuario
+    const userMessage = document.createElement("div");
+    userMessage.className = "message user";
+    userMessage.innerText = message;
+    chat.appendChild(userMessage);
+
+    messageInput.value = "";
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, company, message })
+    });
+
+    const data = await response.json();
+
+    // Mostrar respuesta bot
+    const botMessage = document.createElement("div");
+    botMessage.className = "message bot";
+    botMessage.innerText = data.response;
+    chat.appendChild(botMessage);
+
+    chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
