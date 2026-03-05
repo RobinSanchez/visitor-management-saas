@@ -228,3 +228,7 @@ def create_operator(
     db.refresh(new_user)
 
     return {"message": "Operador creado correctamente"}
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to Visitor Management SaaS"}
