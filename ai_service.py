@@ -8,7 +8,7 @@ def load_knowledge_base():
 knowledge_base = load_knowledge_base()
 
 
-def get_ai_response(message: str):
+def ask_ai(message: str):
 
     message = message.lower()
     best_match = None
