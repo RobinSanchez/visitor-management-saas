@@ -56,12 +56,10 @@ class Visitor(Base):
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, index=True)
-
+    visitor_id = Column(Integer, ForeignKey("visitors.id"))
     message = Column(String)
     response = Column(String)
-
-    department = Column(String)
-
     created_at = Column(DateTime, default=datetime.utcnow)
+    department = Column(String)
 
     institution_id = Column(Integer, ForeignKey("institutions.id"))
