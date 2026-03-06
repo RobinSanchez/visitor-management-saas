@@ -237,16 +237,6 @@ def root():
 from ai_service import ask_ai
 
 @app.post("/chat")
-def chat(question: str):
-
-    answer = ask_ai(question)
-
-    return {
-        "question": question,
-        "answer": answer
-    }
-
-@app.post("/chat")
 def chat(
     request: schemas.ChatRequest,
     db: Session = Depends(get_db),
