@@ -1,19 +1,7 @@
-from sqlalchemy import Column, Integer, String
-from database import Base
-import secrets
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from database import Base
 from datetime import datetime
-from sqlalchemy import DateTime
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
-
-
-# Modelo de base de datos
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
-from database import Base
 
 
 class Institution(Base):
@@ -38,9 +26,6 @@ class User(Base):
     institution = relationship("Institution", back_populates="users")
 
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from datetime import datetime
-
 class Visitor(Base):
     __tablename__ = "visitors"
 
@@ -52,14 +37,17 @@ class Visitor(Base):
     institution_id = Column(Integer, ForeignKey("institutions.id"))
     institution = relationship("Institution", back_populates="visitors")
 
-    class Conversation(Base):
+
+class Conversation(Base):
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, index=True)
     visitor_id = Column(Integer, ForeignKey("visitors.id"))
+    visitor = relationship("Visitor")
+    
     message = Column(String)
     response = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
     department = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     institution_id = Column(Integer, ForeignKey("institutions.id"))
