@@ -170,11 +170,12 @@ def admin_dashboard(
         "total_operators": total_operators,
         "recent_visitors": recent_visitors
     })
+from fastapi import Response
+
 @app.get("/logout")
 def logout(response: Response):
     response.delete_cookie("access_token")
     return {"message": "Sesión cerrada"}
-
 # =============================
 # CREATE VISITOR
 # =============================
