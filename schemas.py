@@ -14,4 +14,12 @@ class UserLogin(BaseModel):
 
 class VisitorCreate(BaseModel):
     name: str
-    email: EmailStr       
+    email: EmailStr     
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+class ChatResponse(BaseModel):
+    response: str
+    department: str      

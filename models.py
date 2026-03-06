@@ -51,3 +51,17 @@ class Visitor(Base):
 
     institution_id = Column(Integer, ForeignKey("institutions.id"))
     institution = relationship("Institution", back_populates="visitors")
+
+    class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    message = Column(String)
+    response = Column(String)
+
+    department = Column(String)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    institution_id = Column(Integer, ForeignKey("institutions.id"))

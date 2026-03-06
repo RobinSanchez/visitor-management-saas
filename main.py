@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from fastapi.responses import RedirectResponse
 
 import models
 import schemas
@@ -66,10 +67,10 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 # LOGIN
 # =============================
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import Response
+from fastapi.responses import RedirectResponse
+
 @app.post("/login")
 def login(
-    response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
@@ -85,16 +86,15 @@ def login(
         data={"sub": str(db_user.id)}
     )
 
-    # 👇 Guardamos token en cookie
+    response = RedirectResponse(url="/admin", status_code=302)
+
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
         httponly=True
     )
 
-    return {"message": "Login exitoso"}
-
-from fastapi.responses import HTMLResponse
+    return response
 
 @app.get("/login")
 def login_form():
@@ -232,3 +232,41 @@ def create_operator(
 @app.get("/")
 def root():
     return {"message": "Welcome to Visitor Management SaaS"}
+
+from ai_service import ask_ai
+
+@app.post("/chat")
+def chat(question: str):
+
+    answer = ask_ai(question)
+
+    return {
+        "question": question,
+        "answer": answer
+    }
+
+@app.post("/chat")
+def chat(
+    request: schemas.ChatRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+
+    message = request.message
+
+    response, department = get_ai_response(message)
+
+    conversation = models.Conversation(
+        message=message,
+        response=response,
+        department=department,
+        institution_id=current_user.institution_id
+    )
+
+    db.add(conversation)
+    db.commit()
+
+    return {
+        "response": response,
+        "department": department
+    }

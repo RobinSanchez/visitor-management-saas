@@ -1,23 +1,54 @@
 {
   "inversiones": {
     "department": "Inversiones",
-    "keywords": ["inversion", "invertir", "capital", "rentabilidad"],
-    "response": "Su consulta fue derivada al departamento de Inversiones. Un asesor se pondrá en contacto."
+    "keywords": [
+      "inversion",
+      "invertir",
+      "invertir en venezuela",
+      "capital",
+      "capital extranjero",
+      "inversion extranjera",
+      "registro inversionista"
+    ],
+    "response": "El departamento de Inversiones del CIIP puede asesorarlo en el proceso de inversión y registro de inversionistas."
   },
+
+  "visas": {
+    "department": "Migración",
+    "keywords": [
+      "visa",
+      "visa inversionista",
+      "visa negocio",
+      "tipo de visa",
+      "transeunte negocio",
+      "transeunte inversionista"
+    ],
+    "response": "Existen dos tipos de visa disponibles para inversionistas: Transeúnte de Negocio (TR-N) y Transeúnte de Inversionista (TR-I)."
+  },
+
   "administracion": {
     "department": "Administración",
-    "keywords": ["horario", "hora", "atencion", "abierto"],
+    "keywords": [
+      "horario",
+      "hora",
+      "horario de atencion",
+      "cuando abren",
+      "cuando atienden",
+      "hora de atencion"
+    ],
     "response": "El horario de atención es de lunes a viernes de 8:00 a 16:00."
   },
-  "soporte": {
-    "department": "Soporte",
-    "keywords": ["problema", "error", "ayuda", "soporte"],
-    "response": "El equipo de soporte revisará su consulta y le responderá a la brevedad."
-  },
+
   "contacto": {
     "department": "Contacto",
-    "keywords": ["telefono", "correo", "contacto", "mail"],
-    "response": "Puede comunicarse al correo institucional o vía telefónica."
+    "keywords": [
+      "telefono",
+      "correo",
+      "mail",
+      "contacto",
+      "email",
+      "como comunicarme"
+    ],
+    "response": "Puede comunicarse con la institución a través del correo institucional o vía telefónica."
   }
 }
-

@@ -43,17 +43,26 @@ def get_current_user(
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    token = token.replace("Bearer ", "")
+    try:
+        token = token.replace("Bearer ", "")
 
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    user_id: str = payload.get("sub")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
 
-    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Token inválido")
 
-    if not user:
-        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+        user = db.query(models.User).filter(
+            models.User.id == int(user_id)
+        ).first()
 
-    return user
+        if not user:
+            raise HTTPException(status_code=401, detail="Usuario no encontrado")
+
+        return user
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")
 
 def require_admin(current_user: models.User = Depends(get_current_user)):
     if current_user.role != "admin":
