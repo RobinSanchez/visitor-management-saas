@@ -245,7 +245,7 @@ def chat(
 
     message = request.message
 
-    response, department = get_ai_response(message)
+    response = ask_ai(message)
 
     conversation = models.Conversation(
         message=message,
@@ -258,6 +258,5 @@ def chat(
     db.commit()
 
     return {
-        "response": response,
-        "department": department
+        "response": response
     }
