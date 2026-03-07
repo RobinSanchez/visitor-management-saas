@@ -250,7 +250,7 @@ def chat(
     conversation = models.Conversation(
         message=message,
         response=response,
-        department=department,
+        department="general",
         institution_id=current_user.institution_id
     )
 
