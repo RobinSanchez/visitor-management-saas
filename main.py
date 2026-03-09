@@ -245,12 +245,12 @@ def chat(
 
     message = request.message
 
-    response = ask_ai(message)
+    response, department = ask_ai(message)
 
     conversation = models.Conversation(
         message=message,
         response=response,
-        department="general",
+        department=department,
         institution_id=current_user.institution_id
     )
 
@@ -258,5 +258,6 @@ def chat(
     db.commit()
 
     return {
-        "response": response
+        "response": response,
+        "department": department
     }
