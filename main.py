@@ -14,6 +14,9 @@ from auth import (
     get_current_user,
     require_admin
 )
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 models.Base.metadata.create_all(bind=engine)
 
