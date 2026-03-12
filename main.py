@@ -16,11 +16,12 @@ from auth import (
 )
 from fastapi.staticfiles import StaticFiles
 
+app = FastAPI()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
