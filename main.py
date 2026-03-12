@@ -1,8 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Depends, HTTPException, Request, Response
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+
 from sqlalchemy.orm import Session
-from fastapi.responses import RedirectResponse
+from datetime import datetime
 
 import models
 import schemas
@@ -11,19 +14,31 @@ from auth import (
     get_password_hash,
     verify_password,
     create_access_token,
-    get_current_user,
-    require_admin
+    get_current_user
 )
-from fastapi.staticfiles import StaticFiles
+
+from ai_service import ask_ai
+
+
+# =============================
+# APP INIT
+# =============================
 
 app = FastAPI()
 
+# Static files (widget)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Templates
+templates = Jinja2Templates(directory="templates")
+
+# Create tables
 models.Base.metadata.create_all(bind=engine)
 
 
-templates = Jinja2Templates(directory="templates")
+# =============================
+# ROLE VALIDATION
+# =============================
 
 def require_role(required_role: str):
     def role_checker(current_user: models.User = Depends(get_current_user)):
@@ -31,9 +46,21 @@ def require_role(required_role: str):
             raise HTTPException(status_code=403, detail="No tienes permisos suficientes")
         return current_user
     return role_checker
+
+
+# =============================
+# ROOT
+# =============================
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to Visitor Management SaaS"}
+
+
 # =============================
 # REGISTER
 # =============================
+
 @app.post("/register")
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
@@ -70,8 +97,6 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 # =============================
 # LOGIN
 # =============================
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import RedirectResponse
 
 @app.post("/login")
 def login(
@@ -100,18 +125,22 @@ def login(
 
     return response
 
+
 @app.get("/login")
 def login_form():
     return HTMLResponse("""
         <form action="/login" method="post">
-            <input type="text" name="username" placeholder="username"/>
+            <input type="text" name="username" placeholder="Email"/>
             <input type="password" name="password" placeholder="Password"/>
             <button type="submit">Login</button>
         </form>
     """)
+
+
 # =============================
 # ADMIN INFO
 # =============================
+
 @app.get("/admin/me")
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return {
@@ -122,14 +151,8 @@ def read_users_me(current_user: models.User = Depends(get_current_user)):
 
 
 # =============================
-# ADMIN PANEL (PROTEGIDO + MULTI TENANT)
+# ADMIN DASHBOARD
 # =============================
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-from datetime import date
-from datetime import datetime
-
-templates = Jinja2Templates(directory="templates")
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin_dashboard(
@@ -146,9 +169,9 @@ def admin_dashboard(
     ).count()
 
     visitors_today = db.query(models.Visitor).filter(
-    models.Visitor.institution_id == institution_id,
-    models.Visitor.created_at >= today
-).count()  # luego mejoramos con fecha real
+        models.Visitor.institution_id == institution_id,
+        models.Visitor.created_at >= today
+    ).count()
 
     total_users = db.query(models.User).filter(
         models.User.institution_id == institution_id
@@ -160,8 +183,8 @@ def admin_dashboard(
     ).count()
 
     recent_visitors = db.query(models.Visitor).filter(
-    models.Visitor.institution_id == institution_id
-).order_by(models.Visitor.created_at.desc()).limit(10).all()
+        models.Visitor.institution_id == institution_id
+    ).order_by(models.Visitor.created_at.desc()).limit(10).all()
 
     institution_name = current_user.institution.name
 
@@ -174,15 +197,22 @@ def admin_dashboard(
         "total_operators": total_operators,
         "recent_visitors": recent_visitors
     })
-from fastapi import Response
+
+
+# =============================
+# LOGOUT
+# =============================
 
 @app.get("/logout")
 def logout(response: Response):
     response.delete_cookie("access_token")
     return {"message": "Sesión cerrada"}
+
+
 # =============================
 # CREATE VISITOR
 # =============================
+
 @app.post("/visitors")
 def create_visitor(
     visitor: schemas.VisitorCreate,
@@ -203,6 +233,10 @@ def create_visitor(
     return new_visitor
 
 
+# =============================
+# USERS ADMIN
+# =============================
+
 @app.get("/admin/users")
 def get_users(
     db: Session = Depends(get_db),
@@ -210,7 +244,8 @@ def get_users(
 ):
     return db.query(models.User).filter(
         models.User.institution_id == current_user.institution_id
-    ).all()    
+    ).all()
+
 
 @app.post("/admin/create-operator")
 def create_operator(
@@ -219,6 +254,7 @@ def create_operator(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_role("admin"))
 ):
+
     hashed_pw = get_password_hash(password)
 
     new_user = models.User(
@@ -234,11 +270,10 @@ def create_operator(
 
     return {"message": "Operador creado correctamente"}
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to Visitor Management SaaS"}
 
-from ai_service import ask_ai
+# =============================
+# CHAT AI
+# =============================
 
 @app.post("/chat")
 def chat(
