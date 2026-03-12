@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
 
+import uuid
 
 class Institution(Base):
     __tablename__ = "institutions"
@@ -10,9 +11,7 @@ class Institution(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True)
 
-    users = relationship("User", back_populates="institution")
-    visitors = relationship("Visitor", back_populates="institution")
-
+    api_key = Column(String, unique=True, default=lambda: str(uuid.uuid4()))
 
 class User(Base):
     __tablename__ = "users"
