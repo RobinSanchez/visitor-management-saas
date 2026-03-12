@@ -20,7 +20,6 @@ from auth import (
 from ai_service import ask_ai
 from routers.chat_router import router as chat_router
 
-app.include_router(chat_router)
 
 
 # =============================
@@ -29,8 +28,12 @@ app.include_router(chat_router)
 
 app = FastAPI()
 
+
 # Static files (widget)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+app.include_router(chat_router)
 
 # Templates
 templates = Jinja2Templates(directory="templates")
@@ -303,3 +306,33 @@ def chat(
         "response": response,
         "department": department
     }
+
+@app.post("/chat/public")
+def public_chat(
+    request: schemas.ChatRequest,
+    api_key: str,
+    db: Session = Depends(get_db)
+):
+
+    institution = db.query(models.Institution).filter(
+        models.Institution.api_key == api_key
+    ).first()
+
+    if not institution:
+        raise HTTPException(status_code=403, detail="API key inválida")
+
+    message = request.message
+
+    response, department = ask_ai(message)
+
+    conversation = models.Conversation(
+        message=message,
+        response=response,
+        department=department,
+        institution_id=institution.id
+    )
+
+    db.add(conversation)
+    db.commit()
+
+    return {"response": response}
