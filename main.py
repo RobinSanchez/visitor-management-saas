@@ -306,33 +306,17 @@ def chat(
         "response": response,
         "department": department
     }
+@app.get("/debug/institutions")
+def debug_institutions(db: Session = Depends(get_db)):
+    institutions = db.query(models.Institution).all()
 
-@app.post("/chat/public")
-def public_chat(
-    request: schemas.ChatRequest,
-    api_key: str,
-    db: Session = Depends(get_db)
-):
+    result = []
 
-    institution = db.query(models.Institution).filter(
-        models.Institution.api_key == api_key
-    ).first()
+    for inst in institutions:
+        result.append({
+            "id": inst.id,
+            "name": inst.name,
+            "api_key": inst.api_key
+        })
 
-    if not institution:
-        raise HTTPException(status_code=403, detail="API key inválida")
-
-    message = request.message
-
-    response, department = ask_ai(message)
-
-    conversation = models.Conversation(
-        message=message,
-        response=response,
-        department=department,
-        institution_id=institution.id
-    )
-
-    db.add(conversation)
-    db.commit()
-
-    return {"response": response}
+    return result
