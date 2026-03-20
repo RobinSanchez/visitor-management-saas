@@ -307,14 +307,16 @@ def chat(
         "department": department
     }
 
-@app.get("/debug/institutions")
+@app.get("/debug/institions")
 def debug_institutions(db: Session = Depends(get_db)):
     return [
         {
             "id": inst.id,
-            "name": inst.name,
-            "api_key": inst.api_key
+            "name": inst.name
         }
         for inst in db.query(models.Institution).all()
     ]
-    return result
+
+@app.get("/debug/test")
+def test():
+    return {"status": "ok"}
